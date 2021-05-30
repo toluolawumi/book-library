@@ -79,6 +79,7 @@ exports.loginUser = (req,res) => {
         if (!match){
             return res.status(401).json({message: "incorrect password"})
         }
+        
 
         //create token and send token to user
         jwt.sign({

@@ -7,6 +7,7 @@ require('dotenv').config();//allows to use the variables in .env
 const connectionString = process.env.CONNECTIONSTRING || CONNECTIONSTRING;
 
 
+
 module.exports = () => {
     mongoose.connect(connectionString, {
     useNewUrlParser: true,
