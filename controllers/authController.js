@@ -1,7 +1,9 @@
 const User = require('../models/user');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const secret = "SECURESECRET";
+
+require('dotenv').config();
+const secret = process.env.SECRET || SECRET;
 const expiry = 3600;
 
 exports.registerNewUser = (req,res) => {
@@ -64,6 +66,36 @@ exports.registerNewUser = (req,res) => {
 
 exports.loginUser = (req,res) => {
     //check if users exists
-    //check password is correct
-    
+    User.findOne({username: req.body.username}, (err, foundUser) => {
+        if (err){
+            return res.status(500).json({err})
+        }
+        if (!foundUser){
+            return res.status(401).json({message: "incorrect username"})
+        } 
+         //check password is correct
+        let match = bcrypt.compareSync(req.body.password, foundUser.password)
+
+        if (!match){
+            return res.status(401).json({message: "incorrect password"})
+        }
+
+        //create token and send token to user
+        jwt.sign({
+            id: foundUser.id,
+            username: foundUser.username,
+            firstName: foundUser.firstName,
+            lastName: foundUser.lastName
+        }, secret, {
+            expiresIn: expiry
+        }, (err, token) => {
+            if (err){
+                return res.status(500).json({err})
+            }
+            return res.status(200).json({
+                message: "user logged in",
+                token
+            })
+        })
+    })
 }
