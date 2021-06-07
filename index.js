@@ -1,6 +1,7 @@
 const express = require('express');
 const app = express();
-const PORT = 10000;
+require('dotenv').config();
+const port = process.env.PORT || PORT;
 
 //middleware
 app.use(express.json());
@@ -16,8 +17,12 @@ const bookRoutes = require('./routes/bookRoutes');
 app.use(bookRoutes)
 
 const authRoutes = require('./routes/authRoutes')
-app.use('/auth', authRoutes)
+app.use('/auth', authRoutes);
+
+//seeders
+const {seedAdmin} = require('./seeders/admin')
+//console.log(seedAdmin())
 
 //port listen
-app.listen(PORT)
-    console.log(`app listening on port ${PORT}`)
+app.listen(port)
+    console.log(`app listening on port ${port}`)

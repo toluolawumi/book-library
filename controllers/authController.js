@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 
 require('dotenv').config();
 const secret = process.env.SECRET || SECRET;
-const expiry = 3600;
+const expiry = Number(process.env.EXPIRY);
 
 exports.registerNewUser = (req,res) => {
     //fetch user details from request body
@@ -17,36 +17,34 @@ exports.registerNewUser = (req,res) => {
             return res.status(400).json({message: "username already exists"})
         }
          //create a new user
-        User.create({
+        const user = new User({
                 firstName: req.body.firstName,
                 lastName: req.body.lastName,
-                username: req.body.username
-            }, (err, newUser) => {
+                username: req.body.username,
+            })
+            //hash user's password
+            bcrypt.genSalt(10, (err, salt) =>{
                 if(err){
                     return res.status(500).json({err})
-                }
-                //hash user's password
-                bcrypt.genSalt(10, (err, salt) =>{
-                    if(err){
-                        return res.status(500).json({err})
                     }
-                    bcrypt.hash(req.body.password, salt, (err, hashedPassword) => {
+                bcrypt.hash(req.body.password, salt, (err, hashedPassword) => {
                         if(err){
                             return res.status(500).json({err})
                         }
                         //save password to database
-                        newUser.password = hashedPassword;
-                        newUser.save((err,savedUser) => {
+                        user.password = hashedPassword;
+                        user.save((err,savedUser) => {
                             if(err){
                                 return res.status(500).json({err})
                             }
                 //create token
                 jwt.sign(
                     {
-                        id: newUser.id,
-                        username: newUser.username,
-                        firstName: newUser.firstName,
-                        lastName: newUser.lastName
+                        id: user.id,
+                        username: user.username,
+                        firstName: user.firstName,
+                        lastName: user.lastName,
+                        role: user.role
                     }, secret, {expiresIn: expiry}, (err, token) => {
                         if(err){
                             return res.status(500).json({err})
@@ -61,8 +59,7 @@ exports.registerNewUser = (req,res) => {
                     })
                 })
     })
-})
-   }
+}
 
 exports.loginUser = (req,res) => {
     //check if users exists
@@ -86,7 +83,8 @@ exports.loginUser = (req,res) => {
             id: foundUser.id,
             username: foundUser.username,
             firstName: foundUser.firstName,
-            lastName: foundUser.lastName
+            lastName: foundUser.lastName,
+            role: foundUser.role
         }, secret, {
             expiresIn: expiry
         }, (err, token) => {
@@ -100,3 +98,4 @@ exports.loginUser = (req,res) => {
         })
     })
 }
+
