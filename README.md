@@ -1,7 +1,6 @@
 # book-library
-Backend Code for an Online Library using NodeJS and MongoDB
+Backend API for an Online Library using NodeJS and MongoDB
 
-Frontend Code is currently in development 
 
 ## Tech Stack
 
